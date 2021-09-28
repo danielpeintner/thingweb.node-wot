@@ -25,7 +25,7 @@ import { InteractionOutput } from "./interaction-output";
 import { Readable } from "stream";
 import ProtocolHelpers from "./protocol-helpers";
 import { ReadableStream as PolyfillStream } from "web-streams-polyfill/ponyfill/es2018";
-import { Content } from "./core";
+import { Content, ContentSerdes } from "./core";
 
 export default class ExposedThing extends TD.Thing implements WoT.ExposedThing {
     security: Array<string>;
@@ -487,9 +487,11 @@ export default class ExposedThing extends TD.Thing implements WoT.ExposedThing {
                     bodyInput = ExposedThing.interactionInputToReadable(parameter);
                 }
 
-                let cInput: Content = { body: bodyInput, type: "application/json" };
-                const result = await as.handler(
-                    new InteractionOutput(cInput, undefined, this.actions[actionName].input),
+                let cInput: Content = ContentSerdes.get().valueToContent(bodyInput, this.actions[actionName].input, "application/json");
+                // let cInput: Content = { body: bodyInput, type: "application/json" };
+                let params: InteractionOutput = new InteractionOutput(cInput, undefined, this.actions[actionName].input);
+                const result: WoT.InteractionInput = await as.handler(
+                    params,
                     options
                 );
 
@@ -498,7 +500,8 @@ export default class ExposedThing extends TD.Thing implements WoT.ExposedThing {
                     bodyOutput = ExposedThing.interactionInputToReadable(result);
                 }
                 let cOutput: Content = { body: bodyOutput, type: "application/json" };
-                return new InteractionOutput(cOutput, undefined, this.actions[actionName].output);
+                let response : InteractionOutput = new InteractionOutput(cOutput, undefined, this.actions[actionName].output);
+                return response;
             } else {
                 throw new Error(`ExposedThing '${this.title}' has no handler for Action '${actionName}'`);
             }

@@ -12,6 +12,14 @@
         },
         {
             "type": "node",
+            "request": "launch",
+            "name": "Launch Countdown",
+            "program": "${workspaceRoot}/packages/cli/dist/cli.js",
+            "args": ["countdown.js"],
+            "cwd": "${workspaceRoot}/examples/scripts/"
+        },
+        {
+            "type": "node",
             "request": "attach",
             "name": "Attach to Remote",
             "address": "localhost",
